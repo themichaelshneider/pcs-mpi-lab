@@ -32,40 +32,90 @@ double sequential_sum(int *array, int size, int launches) {
     return total_time / launches; // Среднее время выполнения 
 }
 
-//Параллельный вариант с MPI
+//Параллельный вариант с MPI с учётом разных размеров подмассивов
 double parallel_sum(int *array, int size, int launches, int rank, int size_proc) {
     double total_time = 0.0; 
-    int local_size = size / size_proc; // Размер подмассива для одного процесса
-    int *sub_array = (int *)malloc(local_size * sizeof(int)); // Выделение памяти под подмассив
+    int *sendcounts = NULL; // Массив: сколько элементов отправить каждому процессу
+    int *displs = NULL; // Массив смещений: начальный индекс для каждого процесса
+    int local_size = 0; // Размер подмассива для одного процесса
+    int *sub_array = NULL; // Подмассив на каждый процесс
     long long global_sum = 0, local_sum = 0;
 
+    // Только корневой процесс создаёт sendcounts и displs
+    if (rank == 0) {
+        sendcounts = (int *)malloc(size_proc * sizeof(int));  
+        displs = (int *)malloc(size_proc * sizeof(int));
+
+        if (!sendcounts || !displs) {
+            fprintf(stderr, "Ошибка выделения памяти для sendcounts/displs.\n");
+            MPI_Abort(MPI_COMM_WORLD, 1);  
+        }
+
+        int rem = size % size_proc;  // Остаток, если размер не делится нацело, распределим равномерно по всем процессам
+        int offset = 0;
+        for (int i = 0; i < size_proc; i++) {
+            sendcounts[i] = size / size_proc + (i < rem ? 1 : 0);  // Распределение остатков: первые rem процесов получат по 1 элементу
+            displs[i] = offset;        // Запоминаем начальный индекс
+            offset += sendcounts[i];   // Увеличиваем смещение
+        }
+    }
+
+    // Рассылаем каждому процессу его local_size 
+    int mpi_status = MPI_Scatter(sendcounts, 1, MPI_INT, &local_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (mpi_status != MPI_SUCCESS) {
+        fprintf(stderr, "Ошибка в MPI_Scatter.\n");
+        MPI_Abort(MPI_COMM_WORLD, 2);
+    }
+
+    sub_array = (int *)malloc(local_size * sizeof(int));  // Память под подмассив
+    if (!sub_array) {
+        fprintf(stderr, "Ошибка выделения памяти для sub_array в процессе %d\n", rank);
+        MPI_Abort(MPI_COMM_WORLD, 3);
+    }
+
+    // Основной цикл замеров
     for (int k = 0; k < launches; k++) {
-        local_sum = 0;
-        double start = MPI_Wtime(); 
+        local_sum = 0;                    // Обнуляем локальную сумму
+        double start = MPI_Wtime();      // Засекаем начало времени
 
-        // Распределение массива по всем процессам
-        MPI_Scatter(array, local_size, MPI_INT,
-                    sub_array, local_size, MPI_INT,
-                    0, MPI_COMM_WORLD);
+        // Рассылаем подмассивы разного размера
+        mpi_status = MPI_Scatterv(array, sendcounts, displs, MPI_INT,
+                                  sub_array, local_size, MPI_INT,
+                                  0, MPI_COMM_WORLD);
+        if (mpi_status != MPI_SUCCESS) {
+            fprintf(stderr, "Ошибка в MPI_Scatterv.\n");
+            MPI_Abort(MPI_COMM_WORLD, 4);
+        }
 
-        // Каждый процесс считает свою локальную сумму
+        // Локально считаем сумму
         for (int i = 0; i < local_size; i++) {
             local_sum += sub_array[i];
         }
 
-        // Суммируем все локальные суммы в один итог 
-        MPI_Reduce(&local_sum, &global_sum, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+        // Собираем все локальные суммы в глобальную сумму
+        mpi_status = MPI_Reduce(&local_sum, &global_sum, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+        if (mpi_status != MPI_SUCCESS) {
+            fprintf(stderr, "Ошибка в MPI_Reduce.\n");
+            MPI_Abort(MPI_COMM_WORLD, 5);
+        }
 
-        double end = MPI_Wtime();   
-        total_time += end - start;
+        double end = MPI_Wtime();       // Засекаем конец времени
+        total_time += end - start;      // Сохраняем время выполнения
     }
 
+    
     // Итоговая сумма
     if (rank == 0) {
-        printf("Parallel sum result: %lld\n", global_sum);
+        printf("Параллельная сумма: %lld\n", global_sum);
     }
 
-    free(sub_array);  
+    // Очистка памяти
+    free(sub_array);
+    if (rank == 0) {
+        free(sendcounts);
+        free(displs);
+    }
+    
     return total_time / launches; 
 }
 
