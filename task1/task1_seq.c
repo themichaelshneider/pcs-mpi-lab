@@ -53,8 +53,9 @@ int main(int argc, char* argv[]) {
         int sum = sequential_sum(array, ARRAY_SIZE);
 
         clock_t end = clock();
-        
-        total_time += (double)(end - start) / CLOCKS_PER_SEC;
+
+        double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+        total_time += elapsed
         total_sum = sum;
     }
 
