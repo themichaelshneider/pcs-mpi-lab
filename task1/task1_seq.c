@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ARRAY_SIZE 200000
+#define ARRAY_SIZE 1000000
 
 // последовательная сумма
 int sequential_sum(int* array, int size) {
