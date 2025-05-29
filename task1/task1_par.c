@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
     double total_time = 0.0;
     int total_sum = 0;
 
+    int* full_array = NULL;
     for (int run = 0; run < runs; run++) {
-        int* full_array = NULL;
         
         // Только главный процесс (rank == 0) выделяет и заполняет весь массив
         if (rank == 0) {
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
         if (rank == 0) {
             total_time += (end_time - start_time);
             total_sum = global_sum;
-            fill_random(full_array, ARRAY_SIZE);  // Новые случайные данные для следующего запуска
+            free(full_array);  // Освобождаем память после каждого запуска
         }
     }
 
