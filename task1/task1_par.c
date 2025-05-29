@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <time.h>
 
-#define ARRAY_SIZE 200000  
+#define ARRAY_SIZE 1000000  
 
 // Подсчёт суммы элементов локального массива
 int local_sum(int* array, int size) {
