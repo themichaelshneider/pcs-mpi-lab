@@ -1,0 +1,10 @@
+#!/bin/bash
+# 
+#BSUB -J MyMPIJob          
+#BSUB -W 00:20             
+#BSUB -n 8                       
+#BSUB -R "span[ptile=2]"  
+#BSUB -oo task4_par_8.out          
+#BSUB -eo task4_par_8.err           
+module load mpi/openmpi-x86_64
+mpirun ./task4_par 100
