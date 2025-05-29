@@ -65,7 +65,11 @@ int main(int argc, char* argv[]) {
         // Только главный процесс (rank == 0) выделяет и заполняет весь массив
         if (rank == 0) {
             full_array = (int*)malloc(sizeof(int) * ARRAY_SIZE);
-            srand(time(NULL));
+            if (!full_array) {
+                printf("Ошибка: не удалось выделить память под массив.\n");
+                return 1;
+            }
+            srand(time(NULL) + run);
             fill_random(full_array, ARRAY_SIZE);
         }
         
