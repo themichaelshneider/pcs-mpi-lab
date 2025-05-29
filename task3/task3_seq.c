@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     int *sum = malloc(sizeof(int) * ARRAY_SIZE);
     int *diff = malloc(sizeof(int) * ARRAY_SIZE);
     int *prod = malloc(sizeof(int) * ARRAY_SIZE);
-    double *quot = malloc(sizeof(int) * ARRAY_SIZE);
+    double *quot = malloc(sizeof(double) * ARRAY_SIZE);
 
     if (!a || !b || !sum || !diff || !prod || !quot) {
         printf("Ошибка выделения памяти.\n");
