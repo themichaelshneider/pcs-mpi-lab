@@ -52,21 +52,23 @@ int main(int argc, char* argv[]) {
 
     // Вычисляем размер локального подмассива (должен быть кратен количеству процессов)
     int local_size = ARRAY_SIZE / size;
-
-    int* full_array = NULL;
     int* local_array = (int*)malloc(sizeof(int) * local_size);
 
-    // Только главный процесс (rank == 0) выделяет и заполняет весь массив
-    if (rank == 0) {
-        full_array = (int*)malloc(sizeof(int) * ARRAY_SIZE);
-        srand(time(NULL));
-        fill_random(full_array, ARRAY_SIZE);
-    }
+
 
     double total_time = 0.0;
     int total_sum = 0;
 
     for (int run = 0; run < runs; run++) {
+        int* full_array = NULL;
+        
+        // Только главный процесс (rank == 0) выделяет и заполняет весь массив
+        if (rank == 0) {
+            full_array = (int*)malloc(sizeof(int) * ARRAY_SIZE);
+            srand(time(NULL));
+            fill_random(full_array, ARRAY_SIZE);
+        }
+        
         // Синхронизация всех процессов перед началом измерения времени
         MPI_Barrier(MPI_COMM_WORLD);
         double start_time = MPI_Wtime();
