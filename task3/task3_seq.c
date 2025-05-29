@@ -12,7 +12,7 @@ void fill_random(int *array, int size) {
 }
 
 // Функция выполнения всех арифметических операций над массивами
-void compute_operations(int *a, int *b, int *sum, int *diff, int *prod, int *quot, int size) {
+void compute_operations(int *a, int *b, int *sum, int *diff, int *prod, double *quot, int size) {
     for (int i = 0; i < size; i++) {
         sum[i]  = a[i] + b[i];
         diff[i] = a[i] - b[i];
