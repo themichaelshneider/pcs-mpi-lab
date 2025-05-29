@@ -3,8 +3,8 @@
 #include <time.h>
 #include <mpi.h>
 
-#define ROWS 450
-#define COLS 450
+#define ROWS 500
+#define COLS 500
 #define SIZE (ROWS * COLS)
 
 // Заполнение массива случайными числами от 1 до 100
