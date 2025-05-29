@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ROWS 450
-#define COLS 450
+#define ROWS 1000
+#define COLS 1000
 
 // Заполнение матрицы случайными числами от 1 до 100
 void fill_random(int matrix[ROWS][COLS]) {
