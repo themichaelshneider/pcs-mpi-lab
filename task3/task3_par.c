@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <time.h>
 
-#define ARRAY_SIZE 200000
+#define ARRAY_SIZE 1000000
 
 // Заполнение массива случайными значениями от 1 до 100
 void fill_random(int *array, int size) {
