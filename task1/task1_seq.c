@@ -33,20 +33,27 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    srand(time(NULL));
 
     int* array = (int*)malloc(sizeof(int) * ARRAY_SIZE);
-    fill_random(array, ARRAY_SIZE);
-
+    if (!array) {
+        printf("Ошибка: не удалось выделить память под массив.\n");
+        return 1;
+    }
+    
     double total_time = 0.0;
     int total_sum = 0;
 
     for (int run = 0; run < runs; run++) {
+        
+        srand(time(NULL) + run); 
+        fill_random(array, ARRAY_SIZE);
+        
         clock_t start = clock();
 
         int sum = sequential_sum(array, ARRAY_SIZE);
 
         clock_t end = clock();
+        
         total_time += (double)(end - start) / CLOCKS_PER_SEC;
         total_sum = sum;
     }
